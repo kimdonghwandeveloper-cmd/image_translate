@@ -12,11 +12,12 @@ __pycache__/
 
 # Debug Outputs & Results
 debug_crops/
-debug_detection.png
 debug_*.py
 debug_*.txt
-result_*.png
-output.png
+*.png
+*.jpg
+*.jpeg
+
 
 # PaddleOCR Models & Cache
 .paddlex/

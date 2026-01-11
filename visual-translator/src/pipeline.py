@@ -15,7 +15,7 @@ class VisualTranslatorPipeline:
         self.translator = translator
         self.renderer = renderer
 
-    def run(self, input_path, output_path):
+    def run(self, input_path, output_path, use_rotation=True):
         """
         v5 Pipeline (Hybrid):
         1. Detect Text
@@ -23,6 +23,8 @@ class VisualTranslatorPipeline:
         3. Translate & Render (Type) new text using Pillow (High Legibility)
         """
         print(f"[Pipeline] Start processing (v5 Hybrid Mode): {input_path}")
+        if not use_rotation:
+             print("[Pipeline] Rotation correction DISABLED.")
         
         # 1. Text Search
         detection_results = self.detector.detect(input_path)
@@ -117,7 +119,12 @@ class VisualTranslatorPipeline:
             vec = box[1] - box[0]
             angle_rad = np.arctan2(vec[1], vec[0])
             angle_deg = np.degrees(angle_rad)
-            render_angle = -angle_deg 
+            
+            # [Phase 4] Rotation Control
+            if use_rotation:
+                render_angle = -angle_deg
+            else:
+                render_angle = 0.0
             
             # Render (Pillow) - 깔끔한 폰트로 그리기
             # [Phase 4] Use Smart Color

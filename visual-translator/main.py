@@ -20,6 +20,7 @@ def main():
     parser = argparse.ArgumentParser(description="Visual Translator CLI")
     parser.add_argument("image_path", help="Path to the input image")
     parser.add_argument("--output", default="output.png", help="Path to save the translated image")
+    parser.add_argument("--no-rotate", action="store_true", help="Disable text rotation correction")
     args = parser.parse_args()
 
     # Verify API Keys
@@ -48,7 +49,7 @@ def main():
     pipeline = VisualTranslatorPipeline(detector, inpainter, translator, renderer)
     
     try:
-        pipeline.run(args.image_path, args.output)
+        pipeline.run(args.image_path, args.output, use_rotation=not args.no_rotate)
     except Exception as e:
         print(f"Error occurred: {e}")
         traceback.print_exc()

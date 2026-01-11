@@ -62,13 +62,11 @@ STABILITY_API_KEY=여러분의_스태빌리티_키_입력
 아주 간단합니다. 번역하고 싶은 이미지 파일이 있다면 실행해 보세요!
 
 ```bash
-python main.py [이미지파일이름]
-```
-
-**예시:** `menu.jpg` 라는 사진을 번역하고 싶다면?
-
-```bash
+# 기본 실행
 python main.py menu.jpg --output menu_translated.png
+
+# (NEW) 텍스트 회전 기능 끄기 (OCR 각도가 이상할 때 사용)
+python main.py menu.jpg --no-rotate
 ```
 잠시 기다리면 `menu_translated.png` 파일이 짠! 하고 나타납니다.
 
