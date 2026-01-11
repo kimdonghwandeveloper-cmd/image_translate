@@ -1,0 +1,30 @@
+# Environment Variables (Crucial!)
+.env
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# Debug Outputs & Results
+debug_crops/
+debug_detection.png
+debug_*.py
+debug_*.txt
+result_*.png
+output.png
+
+# PaddleOCR Models & Cache
+.paddlex/
+inference/
+
+# IDE Settings
+.vscode/
+.idea/
+
+# Package Management
+uv.lock
