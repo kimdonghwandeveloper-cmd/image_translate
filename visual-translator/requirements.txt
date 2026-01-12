@@ -6,7 +6,7 @@ pillow>=10.2.0
 numpy>=1.26.0
 
 # Generative AI APIs
-google-generativeai>=0.3.2
+openai>=1.0.0
 stability-sdk>=0.8.0
 
 # Utilities

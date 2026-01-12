@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import time
 from PIL import Image
 from src.detector import TextDetector
 from src.inpainter import Inpainter, OpenCVInpainter, StabilityAIInpainter
@@ -27,8 +28,11 @@ class VisualTranslatorPipeline:
              print("[Pipeline] Rotation correction DISABLED.")
         
         # 1. Text Search
+        start_time = time.time()
+        print(f"[Phase 6] Starting Detection...")
         detection_results = self.detector.detect(input_path)
-        print(f"[Pipeline] Detected {len(detection_results)} text regions.")
+        detect_time = time.time() - start_time
+        print(f"[Pipeline] Detected {len(detection_results)} text regions. (Time: {detect_time:.2f}s)")
         
         original_cv2 = cv2.imread(input_path)
         if original_cv2 is None:
@@ -51,9 +55,12 @@ class VisualTranslatorPipeline:
             box = item['box']
             detected_texts.append(item)
             
-            # [Phase 4] Visualize Bounding Box
+            confidence = item.get('confidence', 0.0)
+            
+            # [Phase 4] Visualize Bounding Box & [Phase 6] Confidence
             cv2.polylines(debug_vis_image, [box], True, (0, 255, 0), 2)
-            cv2.putText(debug_vis_image, str(idx+1), (box[0][0], box[0][1]-5), 
+            label = f"{idx+1} ({confidence:.2f})"
+            cv2.putText(debug_vis_image, label, (box[0][0], box[0][1]-5), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             
             # [Phase 4] Save Crop Image
@@ -97,7 +104,10 @@ class VisualTranslatorPipeline:
         
         print(f"[Pipeline] Restoring background (Erase text)...")
         # 여기서 Stability AI가 사용됨 (API Key가 있으면)
+        start_time = time.time()
         background_restored = self.inpainter.inpaint(inpainted_cv2, dilated_mask)
+        inpaint_time = time.time() - start_time
+        print(f"[Phase 6] Inpainting Time: {inpaint_time:.2f}s")
         
         # OpenCV -> PIL 변환 (렌더링은 PIL이 한글 폰트 처리에 유리)
         background_restored_rgb = cv2.cvtColor(background_restored, cv2.COLOR_BGR2RGB)
@@ -130,6 +140,30 @@ class VisualTranslatorPipeline:
             # [Phase 4] Use Smart Color
             text_color = item.get('text_color', (0, 0, 0))
             self.renderer.render(pil_image, translated_text, box, render_angle, text_color=text_color)
+            
+            self.renderer.render(pil_image, translated_text, box, render_angle, text_color=text_color)
+            
+        # [Phase 6] Export Metrics to JSON for Jupyter Notebook
+        import json
+        metrics = {
+             "latency": {
+                 "detection": detect_time,
+                 "inpainting": inpaint_time
+             },
+             "regions": []
+        }
+        
+        for idx, item in enumerate(detected_texts):
+             metrics["regions"].append({
+                 "id": idx + 1,
+                 "confidence": float(item.get('confidence', 0)),
+                 "original_text": item['text'],
+                 "translated_text": self.translator.translate(item['text']) 
+             })
+             
+        with open("pipeline_metrics.json", "w", encoding="utf-8") as f:
+            json.dump(metrics, f, indent=4, ensure_ascii=False)
+        print("[Phase 6] Saved metrics to 'pipeline_metrics.json'")
             
         # 4. Save
         pil_image.save(output_path)
